@@ -93,6 +93,21 @@ pub fn create_filters(draw_target: &DrawTarget,
                 contrast.set_input(LinearTransferInput, &filter);
                 filter = contrast
             }
+            filter::Filter::DropShadow(amount) => {
+                let amount = amount as AzFloat;
+                let contrast = draw_target.create_filter(FilterType::LinearTransfer);
+                contrast.set_attribute(LinearTransferAttribute::DisableR(false));
+                contrast.set_attribute(LinearTransferAttribute::DisableG(false));
+                contrast.set_attribute(LinearTransferAttribute::DisableB(false));
+                contrast.set_attribute(LinearTransferAttribute::SlopeR(amount));
+                contrast.set_attribute(LinearTransferAttribute::SlopeG(amount));
+                contrast.set_attribute(LinearTransferAttribute::SlopeB(amount));
+                contrast.set_attribute(LinearTransferAttribute::InterceptR(-0.5 * amount + 0.5));
+                contrast.set_attribute(LinearTransferAttribute::InterceptG(-0.5 * amount + 0.5));
+                contrast.set_attribute(LinearTransferAttribute::InterceptB(-0.5 * amount + 0.5));
+                contrast.set_input(LinearTransferInput, &filter);
+                filter = contrast
+            }
             filter::Filter::Blur(amount) => {
                 *accumulated_blur_radius = accumulated_blur_radius.clone() + amount;
                 let amount = amount.to_f32_px();

@@ -3037,6 +3037,7 @@ pub mod longhands {
             Blur(Length),
             Brightness(CSSFloat),
             Contrast(CSSFloat),
+            DropShadow(CSSFloat), //DEBUG
             Grayscale(CSSFloat),
             HueRotate(Angle),
             Invert(CSSFloat),
@@ -3055,6 +3056,7 @@ pub mod longhands {
                 Blur(Au),
                 Brightness(CSSFloat),
                 Contrast(CSSFloat),
+                DropShadow(CSSFloat), //DEBUG
                 Grayscale(CSSFloat),
                 HueRotate(Angle),
                 Invert(CSSFloat),
@@ -3130,6 +3132,7 @@ pub mod longhands {
                     }
                     SpecifiedFilter::Brightness(value) => try!(write!(dest, "brightness({})", value)),
                     SpecifiedFilter::Contrast(value) => try!(write!(dest, "contrast({})", value)),
+                    SpecifiedFilter::DropShadow(value) => try!(write!(dest, "drop-shadow({})", value)),
                     SpecifiedFilter::Grayscale(value) => try!(write!(dest, "grayscale({})", value)),
                     SpecifiedFilter::HueRotate(value) => {
                         try!(dest.write_str("hue-rotate("));
@@ -3162,6 +3165,7 @@ pub mod longhands {
                             "blur" => specified::Length::parse_non_negative(input).map(SpecifiedFilter::Blur),
                             "brightness" => parse_factor(input).map(SpecifiedFilter::Brightness),
                             "contrast" => parse_factor(input).map(SpecifiedFilter::Contrast),
+                            "drop-shadow" => parse_factor(input).map(SpecifiedFilter::DropShadow),
                             "grayscale" => parse_factor(input).map(SpecifiedFilter::Grayscale),
                             "hue-rotate" => Angle::parse(input).map(SpecifiedFilter::HueRotate),
                             "invert" => parse_factor(input).map(SpecifiedFilter::Invert),
@@ -3198,6 +3202,7 @@ pub mod longhands {
                             computed_value::Filter::Blur(factor.to_computed_value(context)),
                         &SpecifiedFilter::Brightness(factor) => computed_value::Filter::Brightness(factor),
                         &SpecifiedFilter::Contrast(factor) => computed_value::Filter::Contrast(factor),
+                        &SpecifiedFilter::DropShadow(factor) => computed_value::Filter::DropShadow(factor),
                         &SpecifiedFilter::Grayscale(factor) => computed_value::Filter::Grayscale(factor),
                         &SpecifiedFilter::HueRotate(factor) => computed_value::Filter::HueRotate(factor),
                         &SpecifiedFilter::Invert(factor) => computed_value::Filter::Invert(factor),
