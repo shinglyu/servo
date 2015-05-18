@@ -6,7 +6,8 @@
 
 use azure::AzFloat;
 use azure::azure_hl::{ColorMatrixAttribute, ColorMatrixInput, CompositeInput, DrawTarget};
-use azure::azure_hl::{FilterNode, FilterType, LinearTransferAttribute, LinearTransferInput};
+use azure::azure_hl::{Color, ColorPattern};
+use azure::azure_hl::{FilterNode, FilterType, FloodAttribute, LinearTransferAttribute, LinearTransferInput};
 use azure::azure_hl::{Matrix5x4, TableTransferAttribute, TableTransferInput};
 use azure::azure_hl::{GaussianBlurAttribute, GaussianBlurInput};
 
@@ -93,20 +94,69 @@ pub fn create_filters(draw_target: &DrawTarget,
                 contrast.set_input(LinearTransferInput, &filter);
                 filter = contrast
             }
-            filter::Filter::DropShadow(amount) => {
-                let amount = amount as AzFloat;
-                let contrast = draw_target.create_filter(FilterType::LinearTransfer);
-                contrast.set_attribute(LinearTransferAttribute::DisableR(false));
-                contrast.set_attribute(LinearTransferAttribute::DisableG(false));
-                contrast.set_attribute(LinearTransferAttribute::DisableB(false));
-                contrast.set_attribute(LinearTransferAttribute::SlopeR(amount));
-                contrast.set_attribute(LinearTransferAttribute::SlopeG(amount));
-                contrast.set_attribute(LinearTransferAttribute::SlopeB(amount));
-                contrast.set_attribute(LinearTransferAttribute::InterceptR(-0.5 * amount + 0.5));
-                contrast.set_attribute(LinearTransferAttribute::InterceptG(-0.5 * amount + 0.5));
-                contrast.set_attribute(LinearTransferAttribute::InterceptB(-0.5 * amount + 0.5));
-                contrast.set_input(LinearTransferInput, &filter);
-                filter = contrast
+            filter::Filter::DropShadow(box_shadow_attrs) => {
+                /*
+                       RefPtr<FilterNode> alpha = FilterWrappers::ToAlpha(aDT, aSources[0]);
+                       929       RefPtr<FilterNode> blur = FilterWrappers::GaussianBlur(aDT, alpha,
+                       930                                   atts.GetSize(eDropShadowStdDeviation));
+                       931       RefPtr<FilterNode> offsetBlur = FilterWrappers::Offset(aDT, blur,
+                       932                                         atts.GetIntPoint(eDropShadowOffset));
+                       933       RefPtr<FilterNode> flood = aDT->CreateFilter(FilterType::FLOOD);
+                       934       Color color = atts.GetColor(eDropShadowColor);
+                       935       if (aDescription.InputColorSpace(0) == ColorSpace::LinearRGB) {
+                       936         color = Color(gsRGBToLinearRGBMap[uint8_t(color.r * 255)],
+                       937                       gsRGBToLinearRGBMap[uint8_t(color.g * 255)],
+                       938                       gsRGBToLinearRGBMap[uint8_t(color.b * 255)],
+                       939                       color.a);
+                       940       
+                       }
+                       941       flood->SetAttribute(ATT_FLOOD_COLOR, color);
+                       942 
+                           943       RefPtr<FilterNode> composite = aDT->CreateFilter(FilterType::COMPOSITE);
+                       944       composite->SetAttribute(ATT_COMPOSITE_OPERATOR, (uint32_t)COMPOSITE_OPERATOR_IN);
+                       945       composite->SetInput(IN_COMPOSITE_IN_START, offsetBlur);
+                       946       composite->SetInput(IN_COMPOSITE_IN_START + 1, flood);
+                       947 
+                           948       RefPtr<FilterNode> filter = aDT->CreateFilter(FilterType::COMPOSITE);
+                       949       filter->SetAttribute(ATT_COMPOSITE_OPERATOR, (uint32_t)COMPOSITE_OPERATOR_OVER);
+                       950       filter->SetInput(IN_COMPOSITE_IN_START, composite);
+                       951       filter->SetInput(IN_COMPOSITE_IN_START + 1, aSources[0]);
+                       952       return filter;
+                       */
+                //let composite = draw_target.create_filter(FilterType::Composite);
+                //let drop_shadow = draw_target.create_filter(FilterType::Composite);
+                /*
+            pub struct BoxShadow {
+                pub offset_x: Au,
+                pub offset_y: Au,
+                pub blur_radius: Au,
+                pub spread_radius: Au,
+                pub color: computed::CSSColor,
+                pub inset: bool,
+            }
+            */ 
+                //let alpha = draw_target.create_filter(FilterType::GaussianBlur); //ToAlpha
+                //TODO: to alpha
+                let blur = draw_target.create_filter(FilterType::GaussianBlur);
+                blur.set_attribute(GaussianBlurAttribute::StdDeviation(
+                                          box_shadow_attrs.blur_radius.to_subpx() 
+                                          as AzFloat));
+                blur.set_input(GaussianBlurInput, &filter);
+                //TODO: offset
+                //
+                //let flood = draw_target.create_filter(FilterType::Flood);
+                //let color = box_shadow_attrs.color;
+                //flood.set_attribute(FloodAttribute::Color(ColorPattern::new(Color(color))));
+
+                let composite = draw_target.create_filter(FilterType::Composite);
+                composite.set_input(CompositeInput, &blur);
+                //composite.set_input(CompositeInput, &flood);
+                let drop_shadow= draw_target.create_filter(FilterType::Composite);
+                drop_shadow.set_input(CompositeInput, &blur);
+
+
+                //filter = drop_shadow
+                filter = blur
             }
             filter::Filter::Blur(amount) => {
                 *accumulated_blur_radius = accumulated_blur_radius.clone() + amount;
