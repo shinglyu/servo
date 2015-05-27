@@ -6,8 +6,9 @@
 
 use azure::AzFloat;
 use azure::azure_hl::{ColorMatrixAttribute, ColorMatrixInput, CompositeInput, DrawTarget};
-use azure::azure_hl::{Color, ColorPattern};
-use azure::azure_hl::{FilterNode, FilterType, FloodAttribute, LinearTransferAttribute, LinearTransferInput};
+use azure::azure_hl::{Color, ColorPattern, DiscreteTransferInput, DiscreteTransferAttribute};
+use azure::azure_hl::{TransformAttribute, TransformInput, Matrix};//FIXME:order! order!
+use azure::azure_hl::{FilterNode, FilterType, FloodAttribute, FloodFilterInput, LinearTransferAttribute, LinearTransferInput};
 use azure::azure_hl::{Matrix5x4, TableTransferAttribute, TableTransferInput};
 use azure::azure_hl::{GaussianBlurAttribute, GaussianBlurInput};
 
@@ -135,18 +136,34 @@ pub fn create_filters(draw_target: &DrawTarget,
                 pub inset: bool,
             }
             */ 
-                //let alpha = draw_target.create_filter(FilterType::GaussianBlur); //ToAlpha
+                /* https://msdn.microsoft.com/en-us/library/windows/desktop/hh706329%28v=vs.85%29.aspx */
+                let alpha = draw_target.create_filter(FilterType::DiscreteTransfer); //ToAlpha
+                alpha.set_attribute(DiscreteTransferAttribute::DisableR(false));
+                alpha.set_attribute(DiscreteTransferAttribute::DisableG(false));
+                alpha.set_attribute(DiscreteTransferAttribute::DisableB(false));
+                alpha.set_attribute(DiscreteTransferAttribute::DisableA(true));
+                alpha.set_attribute(DiscreteTransferAttribute::TableR(&[0.0, 1.0]));
+                alpha.set_attribute(DiscreteTransferAttribute::TableG(&[0.0, 1.0]));
+                alpha.set_attribute(DiscreteTransferAttribute::TableB(&[0.0, 1.0]));
+                alpha.set_input(DiscreteTransferInput, &filter);
                 //TODO: to alpha
                 let blur = draw_target.create_filter(FilterType::GaussianBlur);
                 blur.set_attribute(GaussianBlurAttribute::StdDeviation(
-                                          box_shadow_attrs.blur_radius.to_subpx() 
+                                          box_shadow_attrs.blur_radius.to_px() 
                                           as AzFloat));
-                blur.set_input(GaussianBlurInput, &filter);
+                blur.set_input(GaussianBlurInput, &alpha);
                 //TODO: offset
+                let offset = draw_target.create_filter(FilterType::Transform);
+                offset.set_attribute(TransformAttribute::Matrix(self::translation(
+                                     box_shadow_attrs.offset_x.to_f32_px(),
+                                     box_shadow_attrs.offset_y.to_f32_px()
+                                     )));
+                offset.set_input(GaussianBlurInput, &blur);
                 //
-                //let flood = draw_target.create_filter(FilterType::Flood);
-                //let color = box_shadow_attrs.color;
-                //flood.set_attribute(FloodAttribute::Color(ColorPattern::new(Color(color))));
+                let flood = draw_target.create_filter(FilterType::Flood);
+                let color = box_shadow_attrs.to_computed_value().resolve_color().toGfxColor();
+                flood.set_attribute(FloodAttribute::Color(color));
+                flood.set_input(FloodFilterInput, &offset);
 
                 let composite = draw_target.create_filter(FilterType::Composite);
                 composite.set_input(CompositeInput, &blur);
@@ -156,7 +173,8 @@ pub fn create_filters(draw_target: &DrawTarget,
 
 
                 //filter = drop_shadow
-                filter = blur
+                //filter = offset;
+                filter = flood;
             }
             filter::Filter::Blur(amount) => {
                 *accumulated_blur_radius = accumulated_blur_radius.clone() + amount;
@@ -285,6 +303,15 @@ fn sepia(amount: AzFloat) -> Matrix5x4 {
             m43: 0.0,
             m53: 0.0,
         m14: 0.0, m24: 0.0, m34: 0.0, m44: 1.0, m54: 0.0,
+    }
+}
+
+/// Creates a tranlation matrix for offset in box-shadow
+fn translation(x: AzFloat, y: AzFloat) -> Matrix {
+    Matrix {
+        m11: 1.0, m12: 0.0,
+        m21: 0.0, m22: 1.0, 
+        m31: x,   m32: y, 
     }
 }
 
