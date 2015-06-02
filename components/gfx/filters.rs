@@ -13,6 +13,7 @@ use azure::azure_hl::{Matrix5x4, TableTransferAttribute, TableTransferInput};
 use azure::azure_hl::{GaussianBlurAttribute, GaussianBlurInput};
 
 use style::computed_values::filter;
+use style::properties::ComputedValues;
 use util::geometry::Au;
 
 /// Creates a filter pipeline from a set of CSS filters. Returns the destination end of the filter
@@ -159,22 +160,27 @@ pub fn create_filters(draw_target: &DrawTarget,
                                      box_shadow_attrs.offset_y.to_f32_px()
                                      )));
                 offset.set_input(GaussianBlurInput, &blur);
-                //
+                /*
+                //TODO: flood 
                 let flood = draw_target.create_filter(FilterType::Flood);
-                let color = box_shadow_attrs.to_computed_value().resolve_color().toGfxColor();
+                let color = resolve_color(box_shadow_attrs.color).toGfxColor();
                 flood.set_attribute(FloodAttribute::Color(color));
                 flood.set_input(FloodFilterInput, &offset);
 
+                //TODO: flood + composite
                 let composite = draw_target.create_filter(FilterType::Composite);
                 composite.set_input(CompositeInput, &blur);
                 //composite.set_input(CompositeInput, &flood);
-                let drop_shadow= draw_target.create_filter(FilterType::Composite);
-                drop_shadow.set_input(CompositeInput, &blur);
+                */
+                let drop_shadow = draw_target.create_filter(FilterType::Composite);
+                //drop_shadow.set_attribute(CompositeAttribute::CompositeOperator(CompositeOperator::COMPOSITE_OPERATOR_OVER))
+                //drop_shadow.set_input(CompositeInputStart, &blur);
+                //drop_shadow.set_input(CompositeInputStart + 1, &filter);
 
 
-                //filter = drop_shadow
+                filter = drop_shadow
                 //filter = offset;
-                filter = flood;
+                //filter = flood;
             }
             filter::Filter::Blur(amount) => {
                 *accumulated_blur_radius = accumulated_blur_radius.clone() + amount;
