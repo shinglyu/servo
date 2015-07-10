@@ -16,6 +16,7 @@ use cursor::Cursor;
 use euclid::{Point2D, Rect, SideOffsets2D, Size2D, Matrix2D, Matrix4};
 use geometry::Au;
 use range::Range;
+use cssparser::Color as CSSColor;
 
 extern {
     // Get the size of a heap block.
@@ -204,3 +205,4 @@ known_heap_size!(0, Rect<T>, Point2D<T>, Size2D<T>, Matrix2D<T>, SideOffsets2D<T
 
 known_heap_size!(0, Au, Color, Cursor, Matrix4);
 known_heap_size!(0, Range<T>);
+known_heap_size!(0, CSSColor);

@@ -2613,7 +2613,7 @@ pub mod longhands {
 
             pub type T = Vec<BoxShadow>;
 
-            #[derive(Clone, PartialEq, Copy)]
+            #[derive(Clone, PartialEq, Copy, HeapSizeOf)]
             pub struct BoxShadow {
                 pub offset_x: Au,
                 pub offset_y: Au,

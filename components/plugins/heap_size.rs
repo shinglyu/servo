@@ -79,3 +79,4 @@ fn heap_size_substructure(cx: &mut ExtCtxt, trait_span: Span, substr: &Substruct
                         }
     })
 }
+
