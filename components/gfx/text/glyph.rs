@@ -60,7 +60,19 @@ impl GlyphEntry {
                starts_ligature,
                glyph_count);
 
-        GlyphEntry::new(glyph_count as u32)
+        let mut val = FLAG_NOT_MISSING;
+
+        if !starts_cluster {
+            val |= FLAG_NOT_CLUSTER_START;
+        }
+
+        if !starts_ligature {
+            val |= FLAG_NOT_LIGATURE_GROUP_START;
+        }
+
+        val |= (glyph_count as u32) << GLYPH_COUNT_SHIFT;
+
+        GlyphEntry::new(val)
     }
 
     fn is_initial(&self) -> bool {
@@ -89,8 +101,16 @@ const GLYPH_ID_MASK: u32            = 0x0000FFFF;
 // side array so that there is a 1:1 mapping of GlyphEntry to
 // unicode char.
 
-// The number of detailed glyphs for this char.
-const GLYPH_COUNT_MASK:              u32 = 0x0000FFFF;
+// The number of detailed glyphs for this char. If the char couldn't
+// be mapped to a glyph (!FLAG_NOT_MISSING), then this actually holds
+// the UTF8 code point instead.
+static GLYPH_COUNT_MASK:              u32 = 0x00FFFF00;
+static GLYPH_COUNT_SHIFT:             u32 = 8;
+// N.B. following Gecko, these are all inverted so that a lot of
+// missing chars can be memset with zeros in one fell swoop.
+static FLAG_NOT_MISSING:              u32 = 0x00000001;
+static FLAG_NOT_CLUSTER_START:        u32 = 0x00000002;
+static FLAG_NOT_LIGATURE_GROUP_START: u32 = 0x00000004;
 
 fn is_simple_glyph_id(id: GlyphId) -> bool {
     ((id as u32) & GLYPH_ID_MASK) == id
@@ -116,6 +136,15 @@ impl GlyphEntry {
     #[inline]
     fn id(&self) -> GlyphId {
         self.value & GLYPH_ID_MASK
+    }
+
+      
+    fn is_ligature_start(&self) -> bool {
+        self.has_flag(!FLAG_NOT_LIGATURE_GROUP_START)
+    }
+
+    fn is_cluster_start(&self) -> bool {
+        self.has_flag(!FLAG_NOT_CLUSTER_START)
     }
 
     /// True if original char was normal (U+0020) space. Other chars may
