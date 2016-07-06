@@ -579,29 +579,32 @@ impl<'a> GlyphStore {
     /// e.g. assume ffi ligate, if we select 2..7("iabcf") in "ffiabcffi", the result
     /// range will become 3..6("abc")
     /// May result in a range which begin == end
+    /// Referenced from Gecko
+    /// https://dxr.mozilla.org/mozilla-central/source/gfx/thebes/gfxTextRun.cpp#384
     fn shrink_to_ligature_boundaries(&self, range: &Range<ByteIndex>) -> Range<ByteIndex> {
         if range.begin() >= range.end(){
             return range.clone();
         }
 
-        let new_range = range.clone();
+        //let new_range = range.clone();
         
         let mut range_start = range.begin();
-        println!("range_start: {}", range_start.to_usize());
-        println!("range_start < range.end: {}", range_start < range.end());
-        println!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
-        println!("Go into while?: {}", range_start < range.end() && !self.char_is_ligature_start(range_start));
+        //println!("range_start: {}", range_start.to_usize());
+        //println!("range_start < range.end: {}", range_start < range.end());
+        //println!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
+        //println!("Go into while?: {}", range_start < range.end() && !self.char_is_ligature_start(range_start));
 
+        // TODO(shignlyu): can we use Range's function instead of calculating usize index?
         while range_start < range.end() && !self.char_is_ligature_start(range_start) {
-            println!("In while loop");
-            println!("range_start < range.end: {}", range_start < range.end());
-            println!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
+            //println!("In while loop");
+            //println!("range_start < range.end: {}", range_start < range.end());
+            //println!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
             range_start = range_start + ByteIndex::new(1);
-            println!("range_start: {}", range_start.to_usize());
+            //println!("range_start: {}", range_start.to_usize());
         }
 
         let mut range_end = range.end();
-        println!("range_end: {}", range_end.to_usize());
+        //println!("range_end: {}", range_end.to_usize());
         if (range_end < self.len()) {
             while range_end > range_start && !self.char_is_ligature_start(range_end) {
                 range_end = range_end - ByteIndex::new(1);
@@ -612,15 +615,35 @@ impl<'a> GlyphStore {
         Range::new(range_start, length)
     }
 
+    /// Referenced from Gecko
+    /// https://dxr.mozilla.org/mozilla-central/source/gfx/thebes/gfxTextRun.cpp#316
+    fn compute_partial_ligature_width(&self, range: &Range<ByteIndex>) -> Au {
+        Au::new(300)
+    }
+
     #[inline]
     pub fn advance_for_byte_range(&self, range: &Range<ByteIndex>, extra_word_spacing: Au) -> Au {
-        println!("range: {}, {}", range.begin().to_usize(), range.end().to_usize());
+        println!("----------------------------------------");
+        println!("range:\t\t\t\t {}, {}", range.begin().to_usize(), range.end().to_usize());
         let no_partial_ligature_range = self.shrink_to_ligature_boundaries(range);
-        println!("no_partial_ligature_range: {}, {}", 
+
+        let left_partial_ligature_range = Range::new(range.begin(), 
+                                                     no_partial_ligature_range.begin() - range.begin());
+        let right_partial_ligature_range = Range::new(no_partial_ligature_range.end(),
+                                                      range.end() - no_partial_ligature_range.end());
+        println!("left_partial_ligature_range:\t {}, {}", 
+                 left_partial_ligature_range.begin().to_usize(), 
+                 left_partial_ligature_range.end().to_usize());
+
+        println!("no_partial_ligature_range:\t {}, {}", 
                  no_partial_ligature_range.begin().to_usize(), 
                  no_partial_ligature_range.end().to_usize());
 
-        if range.begin() == ByteIndex(0) && range.end() == self.len() {
+        println!("right_partial_ligature_range:\t {}, {}", 
+                 right_partial_ligature_range.begin().to_usize(), 
+                 right_partial_ligature_range.end().to_usize());
+
+        let no_partial_ligature_width = if range.begin() == ByteIndex(0) && range.end() == self.len() {
             println!("full range");
             self.total_advance + extra_word_spacing * self.total_spaces
         } else if !self.has_detailed_glyphs {
@@ -629,7 +652,19 @@ impl<'a> GlyphStore {
         } else {
             println!("slow path");
             self.advance_for_byte_range_slow_path(range, extra_word_spacing)
-        }
+        };
+
+        println!("left_partical_ligature_width:\t {}", 
+                 self.compute_partial_ligature_width(&left_partial_ligature_range).to_px());
+        println!("no_partical_ligature_width:\t {}", 
+                 no_partial_ligature_width.to_px());
+        println!("right_partical_ligature_width:\t {}", 
+                 self.compute_partial_ligature_width(&right_partial_ligature_range).to_px());
+
+        return (no_partial_ligature_width + 
+                self.compute_partial_ligature_width(&left_partial_ligature_range) + 
+                self.compute_partial_ligature_width(&right_partial_ligature_range))
+
     }
 
     #[inline]
