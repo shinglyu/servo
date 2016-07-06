@@ -618,7 +618,61 @@ impl<'a> GlyphStore {
     /// Referenced from Gecko
     /// https://dxr.mozilla.org/mozilla-central/source/gfx/thebes/gfxTextRun.cpp#316
     fn compute_partial_ligature_width(&self, range: &Range<ByteIndex>) -> Au {
-        Au::new(300)
+        if range.begin() >= range.end() {
+            return Au::new(0)
+        }
+        // The rest corresponds to gfxTextRun::ComputeLigatureData in Gecko
+        debug_assert!(range.end() < self.len());
+        let mut ligature_start = range.begin();
+        while !self.char_is_ligature_start(ligature_start) {
+            ligature_start = ligature_start - ByteIndex::new(1);
+            debug_assert!(ligature_start.to_usize() > 0)
+        }
+
+        let mut ligature_end = range.begin() + ByteIndex::new(1);
+        while !self.char_is_ligature_start(ligature_end) && ligature_end < self.len() {
+            ligature_end = ligature_end+ ByteIndex::new(1);
+        }
+
+        println!("ligature_range:\t {}, {}", ligature_start.to_usize(), ligature_end.to_usize());
+
+        let ligature_range = Range::new(ligature_start, ligature_end - ligature_start);
+        // Get the advance for glyphs without extra spacing
+        let ligature_width = self.advance_for_byte_range_simple_glyphs(&ligature_range, Au::new(0));
+        let mut total_cluster_count = 0;
+        let mut part_cluster_count  = 0;
+        let mut part_cluster_index  = 0;
+
+        for idx in ligature_range.each_index() {
+            println!("idx:\t {} is cluster start: {}", idx.to_usize(), self.char_is_cluster_start(idx));
+            //WRONG: For "ffi", only the first "f" is cluster start, why?
+            //if idx == ligature_range.begin() || self.char_is_cluster_start(idx) {
+            //if idx == ligature_range.begin() { //|| self.char_is_cluster_start(idx) {
+                total_cluster_count += 1;
+                if (idx < range.begin()) {
+                    part_cluster_index += 1;
+                } else if (idx < range.end()){
+                    part_cluster_count += 1;
+                }
+            //}
+        }
+
+        println!("total_cluster_count:\t {}", total_cluster_count);
+        println!("part_cluster_count:\t {}", part_cluster_count);
+        println!("part_cluster_index:\t {}", part_cluster_index);
+
+        debug_assert!(total_cluster_count > 0);
+
+        if range.end() == ligature_range.end() {
+            // Add the rounding error to the last part
+            let all_parts_width = (ligature_width / total_cluster_count) * total_cluster_count;
+            let rounding_errors = ligature_width - all_parts_width;
+            (ligature_width / total_cluster_count) * part_cluster_count + rounding_errors
+        } else {
+            (ligature_width / total_cluster_count) * part_cluster_count
+        }
+        //(ligature_width / total_cluster_count)
+        // TODO: port the rest of the algorithm here, handle extra spacing
     }
 
     #[inline]
@@ -643,15 +697,15 @@ impl<'a> GlyphStore {
                  right_partial_ligature_range.begin().to_usize(), 
                  right_partial_ligature_range.end().to_usize());
 
-        let no_partial_ligature_width = if range.begin() == ByteIndex(0) && range.end() == self.len() {
-            println!("full range");
+        let no_partial_ligature_width = if no_partial_ligature_range.begin() == ByteIndex(0) && no_partial_ligature_range.end() == self.len() {
+            println!("full no_partial_ligature_range");
             self.total_advance + extra_word_spacing * self.total_spaces
         } else if !self.has_detailed_glyphs {
             println!("simple glyph");
-            self.advance_for_byte_range_simple_glyphs(range, extra_word_spacing)
+            self.advance_for_byte_range_simple_glyphs(&no_partial_ligature_range, extra_word_spacing)
         } else {
             println!("slow path");
-            self.advance_for_byte_range_slow_path(range, extra_word_spacing)
+            self.advance_for_byte_range_slow_path(&no_partial_ligature_range, extra_word_spacing)
         };
 
         println!("left_partical_ligature_width:\t {}", 
@@ -744,6 +798,11 @@ impl<'a> GlyphStore {
     pub fn char_is_ligature_start(&self, i: ByteIndex) -> bool {
         assert!(i < self.len());
         self.entry_buffer[i.to_usize()].is_ligature_start()
+    }
+
+    pub fn char_is_cluster_start(&self, i: ByteIndex) -> bool {
+        assert!(i < self.len());
+        self.entry_buffer[i.to_usize()].is_cluster_start()
     }
 
     pub fn space_count_in_range(&self, range: &Range<ByteIndex>) -> u32 {
