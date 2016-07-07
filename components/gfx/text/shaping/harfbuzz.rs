@@ -187,6 +187,8 @@ impl ShaperMethods for Shaper {
     /// Calculate the layout metrics associated with the given text when painted in a specific
     /// font.
     fn shape_text(&self, text: &str, options: &ShapingOptions, glyphs: &mut GlyphStore) {
+        debug!("shaping text: \"{}\"", text);
+        debug!("shaping options: letter_spacing={}, word_spacing={}", options.letter_spacing.unwrap_or_default().to_f64_px(), options.word_spacing.to_f64_px());
         unsafe {
             let hb_buffer: *mut hb_buffer_t = hb_buffer_create();
             hb_buffer_set_direction(hb_buffer, if options.flags.contains(RTL_FLAG) {
@@ -204,6 +206,7 @@ impl ShaperMethods for Shaper {
                                text.len() as c_int);
 
             let mut features = Vec::new();
+            debug!("IGNORE_LIGATURES_SHAPING_FLAG: {}", options.flags.contains(IGNORE_LIGATURES_SHAPING_FLAG));
             if options.flags.contains(IGNORE_LIGATURES_SHAPING_FLAG) {
                 features.push(hb_feature_t {
                     tag: LIGA,
@@ -212,6 +215,7 @@ impl ShaperMethods for Shaper {
                     end: hb_buffer_get_length(hb_buffer),
                 })
             }
+            debug!("IGNORE_LIGATURES_SHAPING_FLAG: {}", options.flags.contains(DISABLE_KERNING_SHAPING_FLAG));
             if options.flags.contains(DISABLE_KERNING_SHAPING_FLAG) {
                 features.push(hb_feature_t {
                     tag: KERN,
@@ -366,6 +370,7 @@ impl Shaper {
                     glyphs.add_glyph_for_byte_index(byte_idx, character, &data);
                 }
             } else {
+                debug!("Probably ligature goes here?");
                 // collect all glyphs to be assigned to the first character.
                 let mut datas = vec!();
 

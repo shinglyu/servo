@@ -513,13 +513,17 @@ impl<'a> GlyphStore {
             is_simple_advance(data.advance) &&
                 data.offset == Point2D::zero() &&
                 data.cluster_start;  // others are stored in detail buffer
+        debug!("\"{}\" compressible? {}, cluster_start? {}, ligature_start? {}", character, glyph_is_compressible, data.cluster_start, data.ligature_start);
 
         debug_assert!(data.ligature_start); // can't compress ligature continuation glyphs.
         debug_assert!(i < self.len());
 
         let mut entry = if glyph_is_compressible {
+            debug!("Creating simple GlyphEntry id={}", data.id);
             GlyphEntry::simple(data.id, data.advance)
         } else {
+            debug!("Creating complex GlyphEntry id={}, cluster?: {}, ligature?: {}", 
+                    data.id, data.cluster_start, data.ligature_start);
             let glyph = &[DetailedGlyph::new(data.id, data.advance, data.offset)];
             self.has_detailed_glyphs = true;
             self.detail_store.add_detailed_glyphs_for_entry(i, glyph);
@@ -548,6 +552,8 @@ impl<'a> GlyphStore {
 
         self.has_detailed_glyphs = true;
         self.detail_store.add_detailed_glyphs_for_entry(i, &glyphs_vec);
+        debug!("Creating complex GlyphEntry, cluster?: {}, ligature?: {}",
+                 first_glyph_data.cluster_start, first_glyph_data.ligature_start);
 
         let entry = GlyphEntry::complex(first_glyph_data.cluster_start,
                                         first_glyph_data.ligature_start,
@@ -589,22 +595,22 @@ impl<'a> GlyphStore {
         //let new_range = range.clone();
         
         let mut range_start = range.begin();
-        //println!("range_start: {}", range_start.to_usize());
-        //println!("range_start < range.end: {}", range_start < range.end());
-        //println!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
-        //println!("Go into while?: {}", range_start < range.end() && !self.char_is_ligature_start(range_start));
+        //debug!("range_start: {}", range_start.to_usize());
+        //debug!("range_start < range.end: {}", range_start < range.end());
+        //debug!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
+        //debug!("Go into while?: {}", range_start < range.end() && !self.char_is_ligature_start(range_start));
 
         // TODO(shignlyu): can we use Range's function instead of calculating usize index?
         while range_start < range.end() && !self.char_is_ligature_start(range_start) {
-            //println!("In while loop");
-            //println!("range_start < range.end: {}", range_start < range.end());
-            //println!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
+            //debug!("In while loop");
+            //debug!("range_start < range.end: {}", range_start < range.end());
+            //debug!("char_is_ligature_start[{}]: {}", range_start.to_usize(), self.char_is_ligature_start(range_start));
             range_start = range_start + ByteIndex::new(1);
-            //println!("range_start: {}", range_start.to_usize());
+            //debug!("range_start: {}", range_start.to_usize());
         }
 
         let mut range_end = range.end();
-        //println!("range_end: {}", range_end.to_usize());
+        //debug!("range_end: {}", range_end.to_usize());
         if (range_end < self.len()) {
             while range_end > range_start && !self.char_is_ligature_start(range_end) {
                 range_end = range_end - ByteIndex::new(1);
@@ -634,7 +640,7 @@ impl<'a> GlyphStore {
             ligature_end = ligature_end+ ByteIndex::new(1);
         }
 
-        println!("ligature_range:\t {}, {}", ligature_start.to_usize(), ligature_end.to_usize());
+        debug!("ligature_range:\t {}, {}", ligature_start.to_usize(), ligature_end.to_usize());
 
         let ligature_range = Range::new(ligature_start, ligature_end - ligature_start);
         // Get the advance for glyphs without extra spacing
@@ -644,7 +650,7 @@ impl<'a> GlyphStore {
         let mut part_cluster_index  = 0;
 
         for idx in ligature_range.each_index() {
-            println!("idx:\t {} is cluster start: {}", idx.to_usize(), self.char_is_cluster_start(idx));
+            debug!("idx:\t {} is cluster start: {}", idx.to_usize(), self.char_is_cluster_start(idx));
             //WRONG: For "ffi", only the first "f" is cluster start, why?
             //if idx == ligature_range.begin() || self.char_is_cluster_start(idx) {
             //if idx == ligature_range.begin() { //|| self.char_is_cluster_start(idx) {
@@ -657,9 +663,9 @@ impl<'a> GlyphStore {
             //}
         }
 
-        println!("total_cluster_count:\t {}", total_cluster_count);
-        println!("part_cluster_count:\t {}", part_cluster_count);
-        println!("part_cluster_index:\t {}", part_cluster_index);
+        debug!("total_cluster_count:\t {}", total_cluster_count);
+        debug!("part_cluster_count:\t {}", part_cluster_count);
+        debug!("part_cluster_index:\t {}", part_cluster_index);
 
         debug_assert!(total_cluster_count > 0);
 
@@ -677,42 +683,42 @@ impl<'a> GlyphStore {
 
     #[inline]
     pub fn advance_for_byte_range(&self, range: &Range<ByteIndex>, extra_word_spacing: Au) -> Au {
-        println!("----------------------------------------");
-        println!("range:\t\t\t\t {}, {}", range.begin().to_usize(), range.end().to_usize());
+        debug!("----------------------------------------");
+        debug!("range:\t\t\t\t {}, {}", range.begin().to_usize(), range.end().to_usize());
         let no_partial_ligature_range = self.shrink_to_ligature_boundaries(range);
 
         let left_partial_ligature_range = Range::new(range.begin(), 
                                                      no_partial_ligature_range.begin() - range.begin());
         let right_partial_ligature_range = Range::new(no_partial_ligature_range.end(),
                                                       range.end() - no_partial_ligature_range.end());
-        println!("left_partial_ligature_range:\t {}, {}", 
+        debug!("left_partial_ligature_range:\t {}, {}", 
                  left_partial_ligature_range.begin().to_usize(), 
                  left_partial_ligature_range.end().to_usize());
 
-        println!("no_partial_ligature_range:\t {}, {}", 
+        debug!("no_partial_ligature_range:\t {}, {}", 
                  no_partial_ligature_range.begin().to_usize(), 
                  no_partial_ligature_range.end().to_usize());
 
-        println!("right_partial_ligature_range:\t {}, {}", 
+        debug!("right_partial_ligature_range:\t {}, {}", 
                  right_partial_ligature_range.begin().to_usize(), 
                  right_partial_ligature_range.end().to_usize());
 
         let no_partial_ligature_width = if no_partial_ligature_range.begin() == ByteIndex(0) && no_partial_ligature_range.end() == self.len() {
-            println!("full no_partial_ligature_range");
+            debug!("full no_partial_ligature_range");
             self.total_advance + extra_word_spacing * self.total_spaces
         } else if !self.has_detailed_glyphs {
-            println!("simple glyph");
+            debug!("simple glyph");
             self.advance_for_byte_range_simple_glyphs(&no_partial_ligature_range, extra_word_spacing)
         } else {
-            println!("slow path");
+            debug!("slow path");
             self.advance_for_byte_range_slow_path(&no_partial_ligature_range, extra_word_spacing)
         };
 
-        println!("left_partical_ligature_width:\t {}", 
+        debug!("left_partical_ligature_width:\t {}", 
                  self.compute_partial_ligature_width(&left_partial_ligature_range).to_px());
-        println!("no_partical_ligature_width:\t {}", 
+        debug!("no_partical_ligature_width:\t {}", 
                  no_partial_ligature_width.to_px());
-        println!("right_partical_ligature_width:\t {}", 
+        debug!("right_partical_ligature_width:\t {}", 
                  self.compute_partial_ligature_width(&right_partial_ligature_range).to_px());
 
         return (no_partial_ligature_width + 
@@ -871,6 +877,7 @@ impl<'a> GlyphIterator<'a> {
     // Slow path when there is a complex glyph.
     #[inline(never)]
     fn next_complex_glyph(&mut self, entry: &GlyphEntry, i: ByteIndex) -> Option<GlyphInfo<'a>> {
+        debug!("Next complex glyph");
         let glyphs = self.store.detail_store.detailed_glyphs_for_entry(i, entry.glyph_count());
         self.glyph_range = Some(range::each_index(ByteIndex(0), ByteIndex(glyphs.len() as isize)));
         self.next()
@@ -905,6 +912,7 @@ impl<'a> Iterator for GlyphIterator<'a> {
         }
         debug_assert!(i < self.store.len());
         let entry = self.store.entry_buffer[i.to_usize()];
+        debug!("iterator: entry({}).is_simple()? {}", i.to_usize(), entry.is_simple());
         if entry.is_simple() {
             Some(GlyphInfo::Simple(self.store, i))
         } else {
