@@ -25,6 +25,7 @@
             values += "-moz-box -moz-inline-box".split()
         experimental_values = set("flex".split())
     %>
+    use std::panic;
     pub use self::computed_value::T as SpecifiedValue;
     use values::computed::{Context, ComputedValueAsSpecified};
 
@@ -61,8 +62,11 @@
             % for value in values:
                 "${value}" => {
                     % if value in experimental_values:
-                        if !::util::prefs::PREFS.get("layout.${value}.enabled")
-                            .as_boolean().unwrap_or(false) {
+                        let pref = panic::catch_unwind(|| {
+                            !::util::prefs::PREFS.get("layout.${value}.enabled")
+                                .as_boolean().unwrap_or(false)
+                        }).unwrap_or(false);
+                        if pref {
                             return Err(())
                         }
                     % endif

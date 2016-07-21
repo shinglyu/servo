@@ -15,6 +15,7 @@ use std::boxed::Box as StdBox;
 use std::collections::HashSet;
 use std::fmt;
 use std::fmt::{Debug, Write};
+use std::panic;
 use std::sync::Arc;
 
 use app_units::Au;
@@ -965,8 +966,12 @@ impl PropertyDeclaration {
                             }
                         % endif
                         % if property.experimental:
-                            if !::util::prefs::PREFS.get("${property.experimental}")
-                                .as_boolean().unwrap_or(false) {
+                            // Catching the env::current_exe() panic when running in Stylo
+                            let pref = panic::catch_unwind(|| {
+                                !::util::prefs::PREFS.get("${property.experimental}")
+                                    .as_boolean().unwrap_or(false)
+                            }).unwrap_or(false);
+                            if pref {
                                 return PropertyDeclarationParseResult::ExperimentalProperty
                             }
                         % endif
@@ -990,8 +995,11 @@ impl PropertyDeclaration {
                         }
                     % endif
                     % if shorthand.experimental:
-                        if !::util::prefs::PREFS.get("${shorthand.experimental}")
-                            .as_boolean().unwrap_or(false) {
+                        let pref = panic::catch_unwind(|| {
+                            !::util::prefs::PREFS.get("${shorthand.experimental}")
+                                .as_boolean().unwrap_or(false)
+                        }).unwrap_or(false);
+                        if pref {
                             return PropertyDeclarationParseResult::ExperimentalProperty
                         }
                     % endif
