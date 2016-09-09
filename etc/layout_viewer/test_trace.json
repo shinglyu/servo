@@ -1,0 +1,704 @@
+{
+    "children": [],
+    "name": "root",
+    "post": {
+        "children": [
+            {
+                "class": "Block",
+                "data": {
+                    "base": {
+                        "children": [
+                            {
+                                "class": "Block",
+                                "data": {
+                                    "base": {
+                                        "children": [
+                                            {
+                                                "class": "Inline",
+                                                "data": {
+                                                    "base": {
+                                                        "children": [],
+                                                        "id": 140248521269648,
+                                                        "intrinsic_inline_sizes": {
+                                                            "minimum_inline_size": 27.116666666666667,
+                                                            "preferred_inline_size": 27.116666666666667
+                                                        },
+                                                        "position": {
+                                                            "debug_writing_mode": {
+                                                                "mode": {
+                                                                    "bits": 0
+                                                                }
+                                                            },
+                                                            "size": {
+                                                                "block": 18.616666666666667,
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "inline": 620.0
+                                                            },
+                                                            "start": {
+                                                                "b": 0.0,
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "i": 0.0
+                                                            }
+                                                        },
+                                                        "stacking_relative_position": {
+                                                            "_unit": null,
+                                                            "x": 8.0,
+                                                            "y": 8.0
+                                                        }
+                                                    },
+                                                    "first_line_indentation": 0.0,
+                                                    "fragments": {
+                                                        "fragments": [
+                                                            {
+                                                                "border_box": {
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "size": {
+                                                                        "block": 18.616666666666667,
+                                                                        "debug_writing_mode": {
+                                                                            "mode": {
+                                                                                "bits": 0
+                                                                            }
+                                                                        },
+                                                                        "inline": 27.116666666666667
+                                                                    },
+                                                                    "start": {
+                                                                        "b": 0.0,
+                                                                        "debug_writing_mode": {
+                                                                            "mode": {
+                                                                                "bits": 0
+                                                                            }
+                                                                        },
+                                                                        "i": 0.0
+                                                                    }
+                                                                },
+                                                                "id": 0,
+                                                                "margin": {
+                                                                    "block_end": 0.0,
+                                                                    "block_start": 0.0,
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "inline_end": 0.0,
+                                                                    "inline_start": 0.0
+                                                                }
+                                                            }
+                                                        ]
+                                                    },
+                                                    "lines": [
+                                                        {
+                                                            "bounds": {
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "size": {
+                                                                    "block": 18.616666666666667,
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "inline": 27.116666666666667
+                                                                },
+                                                                "start": {
+                                                                    "b": 0.0,
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "i": 0.0
+                                                                }
+                                                            },
+                                                            "green_zone": {
+                                                                "block": 35791394.11666667,
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "inline": 620.0
+                                                            },
+                                                            "inline_metrics": {
+                                                                "ascent": 14.85,
+                                                                "block_size_above_baseline": 14.85,
+                                                                "depth_below_baseline": 3.7666666666666666
+                                                            },
+                                                            "range": {
+                                                                "begin": {
+                                                                    "_field0": 0
+                                                                },
+                                                                "length": {
+                                                                    "_field0": 1
+                                                                }
+                                                            },
+                                                            "visual_runs": null
+                                                        }
+                                                    ],
+                                                    "minimum_block_size_above_baseline": 14.85,
+                                                    "minimum_depth_below_baseline": 3.7666666666666666
+                                                }
+                                            }
+                                        ],
+                                        "id": 140248521619344,
+                                        "intrinsic_inline_sizes": {
+                                            "minimum_inline_size": 27.116666666666667,
+                                            "preferred_inline_size": 27.116666666666667
+                                        },
+                                        "position": {
+                                            "debug_writing_mode": {
+                                                "mode": {
+                                                    "bits": 0
+                                                }
+                                            },
+                                            "size": {
+                                                "block": 18.616666666666667,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "inline": 620.0
+                                            },
+                                            "start": {
+                                                "b": 0.0,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "i": 8.0
+                                            }
+                                        },
+                                        "stacking_relative_position": {
+                                            "_unit": null,
+                                            "x": 8.0,
+                                            "y": 8.0
+                                        }
+                                    },
+                                    "flags": 0,
+                                    "float": null,
+                                    "fragment": {
+                                        "border_box": {
+                                            "debug_writing_mode": {
+                                                "mode": {
+                                                    "bits": 0
+                                                }
+                                            },
+                                            "size": {
+                                                "block": 18.616666666666667,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "inline": 620.0
+                                            },
+                                            "start": {
+                                                "b": 0.0,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "i": 0.0
+                                            }
+                                        },
+                                        "id": 1,
+                                        "margin": {
+                                            "block_end": 0.0,
+                                            "block_start": 0.0,
+                                            "debug_writing_mode": {
+                                                "mode": {
+                                                    "bits": 0
+                                                }
+                                            },
+                                            "inline_end": 0.0,
+                                            "inline_start": 0.0
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "id": 140248521623184,
+                        "intrinsic_inline_sizes": {
+                            "minimum_inline_size": 43.11666666666667,
+                            "preferred_inline_size": 43.11666666666667
+                        },
+                        "position": {
+                            "debug_writing_mode": {
+                                "mode": {
+                                    "bits": 0
+                                }
+                            },
+                            "size": {
+                                "block": 18.616666666666667,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "inline": 636.0
+                            },
+                            "start": {
+                                "b": 8.0,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "i": 0.0
+                            }
+                        },
+                        "stacking_relative_position": {
+                            "_unit": null,
+                            "x": 0.0,
+                            "y": 8.0
+                        }
+                    },
+                    "flags": 0,
+                    "float": null,
+                    "fragment": {
+                        "border_box": {
+                            "debug_writing_mode": {
+                                "mode": {
+                                    "bits": 0
+                                }
+                            },
+                            "size": {
+                                "block": 18.616666666666667,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "inline": 620.0
+                            },
+                            "start": {
+                                "b": 0.0,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "i": 8.0
+                            }
+                        },
+                        "id": 2,
+                        "margin": {
+                            "block_end": 8.0,
+                            "block_start": 8.0,
+                            "debug_writing_mode": {
+                                "mode": {
+                                    "bits": 0
+                                }
+                            },
+                            "inline_end": 8.0,
+                            "inline_start": 8.0
+                        }
+                    }
+                }
+            }
+        ],
+        "id": 140248521623824,
+        "intrinsic_inline_sizes": {
+            "minimum_inline_size": 43.11666666666667,
+            "preferred_inline_size": 43.11666666666667
+        },
+        "position": {
+            "debug_writing_mode": {
+                "mode": {
+                    "bits": 0
+                }
+            },
+            "size": {
+                "block": 1041.0,
+                "debug_writing_mode": {
+                    "mode": {
+                        "bits": 0
+                    }
+                },
+                "inline": 636.0
+            },
+            "start": {
+                "b": 0.0,
+                "debug_writing_mode": {
+                    "mode": {
+                        "bits": 0
+                    }
+                },
+                "i": 0.0
+            }
+        },
+        "stacking_relative_position": {
+            "_unit": null,
+            "x": 0.0,
+            "y": 0.0
+        }
+    },
+    "pre": {
+        "children": [
+            {
+                "class": "Block",
+                "data": {
+                    "base": {
+                        "children": [
+                            {
+                                "class": "Block",
+                                "data": {
+                                    "base": {
+                                        "children": [
+                                            {
+                                                "class": "Inline",
+                                                "data": {
+                                                    "base": {
+                                                        "children": [],
+                                                        "id": 140248521269648,
+                                                        "intrinsic_inline_sizes": {
+                                                            "minimum_inline_size": 27.116666666666667,
+                                                            "preferred_inline_size": 27.116666666666667
+                                                        },
+                                                        "position": {
+                                                            "debug_writing_mode": {
+                                                                "mode": {
+                                                                    "bits": 0
+                                                                }
+                                                            },
+                                                            "size": {
+                                                                "block": 18.616666666666667,
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "inline": 620.0
+                                                            },
+                                                            "start": {
+                                                                "b": 0.0,
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "i": 0.0
+                                                            }
+                                                        },
+                                                        "stacking_relative_position": {
+                                                            "_unit": null,
+                                                            "x": 8.0,
+                                                            "y": 8.0
+                                                        }
+                                                    },
+                                                    "first_line_indentation": 0.0,
+                                                    "fragments": {
+                                                        "fragments": [
+                                                            {
+                                                                "border_box": {
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "size": {
+                                                                        "block": 18.616666666666667,
+                                                                        "debug_writing_mode": {
+                                                                            "mode": {
+                                                                                "bits": 0
+                                                                            }
+                                                                        },
+                                                                        "inline": 27.116666666666667
+                                                                    },
+                                                                    "start": {
+                                                                        "b": 0.0,
+                                                                        "debug_writing_mode": {
+                                                                            "mode": {
+                                                                                "bits": 0
+                                                                            }
+                                                                        },
+                                                                        "i": 0.0
+                                                                    }
+                                                                },
+                                                                "id": 0,
+                                                                "margin": {
+                                                                    "block_end": 0.0,
+                                                                    "block_start": 0.0,
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "inline_end": 0.0,
+                                                                    "inline_start": 0.0
+                                                                }
+                                                            }
+                                                        ]
+                                                    },
+                                                    "lines": [
+                                                        {
+                                                            "bounds": {
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "size": {
+                                                                    "block": 18.616666666666667,
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "inline": 27.116666666666667
+                                                                },
+                                                                "start": {
+                                                                    "b": 0.0,
+                                                                    "debug_writing_mode": {
+                                                                        "mode": {
+                                                                            "bits": 0
+                                                                        }
+                                                                    },
+                                                                    "i": 0.0
+                                                                }
+                                                            },
+                                                            "green_zone": {
+                                                                "block": 35791394.11666667,
+                                                                "debug_writing_mode": {
+                                                                    "mode": {
+                                                                        "bits": 0
+                                                                    }
+                                                                },
+                                                                "inline": 620.0
+                                                            },
+                                                            "inline_metrics": {
+                                                                "ascent": 14.85,
+                                                                "block_size_above_baseline": 14.85,
+                                                                "depth_below_baseline": 3.7666666666666666
+                                                            },
+                                                            "range": {
+                                                                "begin": {
+                                                                    "_field0": 0
+                                                                },
+                                                                "length": {
+                                                                    "_field0": 1
+                                                                }
+                                                            },
+                                                            "visual_runs": null
+                                                        }
+                                                    ],
+                                                    "minimum_block_size_above_baseline": 14.85,
+                                                    "minimum_depth_below_baseline": 3.7666666666666666
+                                                }
+                                            }
+                                        ],
+                                        "id": 140248521619344,
+                                        "intrinsic_inline_sizes": {
+                                            "minimum_inline_size": 27.116666666666667,
+                                            "preferred_inline_size": 27.116666666666667
+                                        },
+                                        "position": {
+                                            "debug_writing_mode": {
+                                                "mode": {
+                                                    "bits": 0
+                                                }
+                                            },
+                                            "size": {
+                                                "block": 18.616666666666667,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "inline": 620.0
+                                            },
+                                            "start": {
+                                                "b": 0.0,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "i": 8.0
+                                            }
+                                        },
+                                        "stacking_relative_position": {
+                                            "_unit": null,
+                                            "x": 8.0,
+                                            "y": 8.0
+                                        }
+                                    },
+                                    "flags": 0,
+                                    "float": null,
+                                    "fragment": {
+                                        "border_box": {
+                                            "debug_writing_mode": {
+                                                "mode": {
+                                                    "bits": 0
+                                                }
+                                            },
+                                            "size": {
+                                                "block": 18.616666666666667,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "inline": 620.0
+                                            },
+                                            "start": {
+                                                "b": 0.0,
+                                                "debug_writing_mode": {
+                                                    "mode": {
+                                                        "bits": 0
+                                                    }
+                                                },
+                                                "i": 0.0
+                                            }
+                                        },
+                                        "id": 1,
+                                        "margin": {
+                                            "block_end": 0.0,
+                                            "block_start": 0.0,
+                                            "debug_writing_mode": {
+                                                "mode": {
+                                                    "bits": 0
+                                                }
+                                            },
+                                            "inline_end": 0.0,
+                                            "inline_start": 0.0
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "id": 140248521623184,
+                        "intrinsic_inline_sizes": {
+                            "minimum_inline_size": 43.11666666666667,
+                            "preferred_inline_size": 43.11666666666667
+                        },
+                        "position": {
+                            "debug_writing_mode": {
+                                "mode": {
+                                    "bits": 0
+                                }
+                            },
+                            "size": {
+                                "block": 18.616666666666667,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "inline": 636.0
+                            },
+                            "start": {
+                                "b": 8.0,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "i": 0.0
+                            }
+                        },
+                        "stacking_relative_position": {
+                            "_unit": null,
+                            "x": 0.0,
+                            "y": 8.0
+                        }
+                    },
+                    "flags": 0,
+                    "float": null,
+                    "fragment": {
+                        "border_box": {
+                            "debug_writing_mode": {
+                                "mode": {
+                                    "bits": 0
+                                }
+                            },
+                            "size": {
+                                "block": 18.616666666666667,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "inline": 620.0
+                            },
+                            "start": {
+                                "b": 0.0,
+                                "debug_writing_mode": {
+                                    "mode": {
+                                        "bits": 0
+                                    }
+                                },
+                                "i": 8.0
+                            }
+                        },
+                        "id": 2,
+                        "margin": {
+                            "block_end": 8.0,
+                            "block_start": 8.0,
+                            "debug_writing_mode": {
+                                "mode": {
+                                    "bits": 0
+                                }
+                            },
+                            "inline_end": 8.0,
+                            "inline_start": 8.0
+                        }
+                    }
+                }
+            }
+        ],
+        "id": 140248521623824,
+        "intrinsic_inline_sizes": {
+            "minimum_inline_size": 43.11666666666667,
+            "preferred_inline_size": 43.11666666666667
+        },
+        "position": {
+            "debug_writing_mode": {
+                "mode": {
+                    "bits": 0
+                }
+            },
+            "size": {
+                "block": 1041.0,
+                "debug_writing_mode": {
+                    "mode": {
+                        "bits": 0
+                    }
+                },
+                "inline": 636.0
+            },
+            "start": {
+                "b": 0.0,
+                "debug_writing_mode": {
+                    "mode": {
+                        "bits": 0
+                    }
+                },
+                "i": 0.0
+            }
+        },
+        "stacking_relative_position": {
+            "_unit": null,
+            "x": 0.0,
+            "y": 0.0
+        }
+    }
+}
