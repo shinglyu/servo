@@ -150,8 +150,8 @@ ${helpers.predefined_type("height",
                           animatable=True)}
 
 ${helpers.predefined_type("min-width",
-                          "LengthOrPercentage",
-                          "computed::LengthOrPercentage::Length(Au(0))",
+                          "LengthOrPercentageOrAuto",
+                          "computed::LengthOrPercentageOrAuto::Auto",
                           "parse_non_negative",
                           animatable=True)}
 
@@ -162,8 +162,8 @@ ${helpers.predefined_type("max-width",
                           animatable=True)}
 
 ${helpers.predefined_type("min-height",
-                          "LengthOrPercentage",
-                          "computed::LengthOrPercentage::Length(Au(0))",
+                          "LengthOrPercentageOrAuto",
+                          "computed::LengthOrPercentageOrAuto::Auto",
                           "parse_non_negative",
                           animatable=True)}
 
