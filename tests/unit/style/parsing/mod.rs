@@ -66,3 +66,4 @@ mod image;
 mod mask;
 mod position;
 mod selectors;
+mod effects;

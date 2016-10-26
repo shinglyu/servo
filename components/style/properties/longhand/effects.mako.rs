@@ -405,12 +405,12 @@ ${helpers.predefined_type("opacity",
 // FIXME: This prop should be animatable
 <%helpers:longhand name="filter" products="servo" animatable="False">
     //pub use self::computed_value::T as SpecifiedValue;
-    use cssparser::ToCss;
+    use cssparser::{self, ToCss};
     use std::fmt;
     use values::LocalToCss;
     use values::CSSFloat;
     use values::HasViewportPercentage;
-    use values::specified::{Angle, Length};
+    use values::specified::{Angle, CSSColor, Length};
 
     impl HasViewportPercentage for SpecifiedValue {
         fn has_viewport_percentage(&self) -> bool {
@@ -421,7 +421,7 @@ ${helpers.predefined_type("opacity",
 
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "servo", derive(HeapSizeOf))]
-    pub struct SpecifiedValue(Vec<SpecifiedFilter>);
+    pub struct SpecifiedValue(pub Vec<SpecifiedFilter>);
 
     impl HasViewportPercentage for SpecifiedFilter {
         fn has_viewport_percentage(&self) -> bool {
@@ -445,15 +445,17 @@ ${helpers.predefined_type("opacity",
         Opacity(CSSFloat),
         Saturate(CSSFloat),
         Sepia(CSSFloat),
+        DropShadow(Length, Length, Length, Option<CSSColor>),
     }
 
     pub mod computed_value {
         use app_units::Au;
         use values::CSSFloat;
+        use values::computed::CSSColor;
         use values::specified::{Angle};
 
         #[derive(Clone, PartialEq, Debug)]
-        #[cfg_attr(feature = "servo", derive(HeapSizeOf, Deserialize, Serialize))]
+        #[cfg_attr(feature = "servo", derive(HeapSizeOf))]
         pub enum Filter {
             Blur(Au),
             Brightness(CSSFloat),
@@ -464,10 +466,11 @@ ${helpers.predefined_type("opacity",
             Opacity(CSSFloat),
             Saturate(CSSFloat),
             Sepia(CSSFloat),
+            DropShadow(Au, Au, Au, CSSColor),
         }
 
         #[derive(Clone, PartialEq, Debug)]
-        #[cfg_attr(feature = "servo", derive(HeapSizeOf, Deserialize, Serialize))]
+        #[cfg_attr(feature = "servo", derive(HeapSizeOf))]
         pub struct T { pub filters: Vec<Filter> }
 
         impl T {
@@ -561,6 +564,17 @@ ${helpers.predefined_type("opacity",
                 computed_value::Filter::Opacity(value) => try!(write!(dest, "opacity({})", value)),
                 computed_value::Filter::Saturate(value) => try!(write!(dest, "saturate({})", value)),
                 computed_value::Filter::Sepia(value) => try!(write!(dest, "sepia({})", value)),
+                computed_value::Filter::DropShadow(offset_x, offset_y, blur_radius, ref color) => {
+                    try!(dest.write_str("drop-shadow("));
+                    try!(offset_x.to_css(dest));
+                    try!(dest.write_str(", "));
+                    try!(offset_y.to_css(dest));
+                    try!(dest.write_str(", "));
+                    try!(blur_radius.to_css(dest));
+                    try!(dest.write_str(", "));
+                    try!(color.to_css(dest));
+                    try!(dest.write_str(")"));
+                }
             }
             Ok(())
         }
@@ -586,6 +600,19 @@ ${helpers.predefined_type("opacity",
                 SpecifiedFilter::Opacity(value) => try!(write!(dest, "opacity({})", value)),
                 SpecifiedFilter::Saturate(value) => try!(write!(dest, "saturate({})", value)),
                 SpecifiedFilter::Sepia(value) => try!(write!(dest, "sepia({})", value)),
+                SpecifiedFilter::DropShadow(offset_x, offset_y, blur_radius, ref color) => {
+                    try!(dest.write_str("drop-shadow("));
+                    try!(offset_x.to_css(dest));
+                    try!(dest.write_str(", "));
+                    try!(offset_y.to_css(dest));
+                    try!(dest.write_str(", "));
+                    try!(blur_radius.to_css(dest));
+                    if let &Some(ref color) = color {
+                        try!(dest.write_str(", "));
+                        try!(color.to_css(dest));
+                    }
+                    try!(dest.write_str(")"));
+                }
             }
             Ok(())
         }
@@ -650,6 +677,16 @@ ${helpers.predefined_type("opacity",
                     SpecifiedFilter::Opacity(factor) => computed_value::Filter::Opacity(factor),
                     SpecifiedFilter::Saturate(factor) => computed_value::Filter::Saturate(factor),
                     SpecifiedFilter::Sepia(factor) => computed_value::Filter::Sepia(factor),
+                    SpecifiedFilter::DropShadow(offset_x, offset_y, blur_radius, ref color) => {
+                        computed_value::Filter::DropShadow(
+                            offset_x.to_computed_value(context),
+                            offset_y.to_computed_value(context),
+                            blur_radius.to_computed_value(context),
+                            color.as_ref()
+                                 .map(|color| color.parsed)
+                                 .unwrap_or(cssparser::Color::CurrentColor),
+                        )
+                    }
                 }
             }).collect() }
         }
@@ -667,6 +704,14 @@ ${helpers.predefined_type("opacity",
                     computed_value::Filter::Opacity(factor) => SpecifiedFilter::Opacity(factor),
                     computed_value::Filter::Saturate(factor) => SpecifiedFilter::Saturate(factor),
                     computed_value::Filter::Sepia(factor) => SpecifiedFilter::Sepia(factor),
+                    computed_value::Filter::DropShadow(offset_x, offset_y, blur_radius, color) => {
+                        SpecifiedFilter::DropShadow(
+                            ToComputedValue::from_computed_value(&offset_x),
+                            ToComputedValue::from_computed_value(&offset_y),
+                            ToComputedValue::from_computed_value(&blur_radius),
+                            Some(ToComputedValue::from_computed_value(&color)),
+                        )
+                    }
                 }
             }).collect())
         }
