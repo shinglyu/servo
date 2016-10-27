@@ -641,6 +641,7 @@ ${helpers.predefined_type("opacity",
                         "opacity" => parse_factor(input).map(SpecifiedFilter::Opacity),
                         "saturate" => parse_factor(input).map(SpecifiedFilter::Saturate),
                         "sepia" => parse_factor(input).map(SpecifiedFilter::Sepia),
+                        "drop-shadow" => parse_drop_shadow(input),
                         _ => Err(())
                     }
                 })));
@@ -659,6 +660,14 @@ ${helpers.predefined_type("opacity",
             Ok(Token::Percentage(value)) => Ok(value.unit_value),
             _ => Err(())
         }
+    }
+
+    fn parse_drop_shadow(input: &mut Parser) -> Result<SpecifiedFilter, ()> {
+        let offset_x = try!(specified::Length::parse(input));
+        let offset_y = try!(specified::Length::parse(input));
+        let blur_radius = input.try(specified::Length::parse).unwrap_or(specified::Length::from_px(0.0));
+        let color = input.try(specified::CSSColor::parse).ok();
+        Ok(SpecifiedFilter::DropShadow(offset_x, offset_y, blur_radius, color))
     }
 
     impl ToComputedValue for SpecifiedValue {

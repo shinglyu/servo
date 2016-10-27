@@ -61,6 +61,14 @@ macro_rules! parse_longhand {
     }};
 }
 
+macro_rules! assert_parse_longhand_will_fail {
+    ($name:ident, $s:expr) => {{
+        let url = Url::parse("http://localhost").unwrap();
+        let context = ParserContext::new(Origin::Author, &url, Box::new(CSSErrorReporterTest));
+        assert!($name::parse(&context, &mut Parser::new($s)).is_err())
+    }};
+}
+
 mod basic_shape;
 mod image;
 mod mask;
