@@ -403,8 +403,7 @@ ${helpers.predefined_type("opacity",
 </%helpers:longhand>
 
 // FIXME: This prop should be animatable
-<%helpers:longhand name="filter" products="servo" animatable="False">
-    //pub use self::computed_value::T as SpecifiedValue;
+<%helpers:longhand name="filter" animatable="False">
     use cssparser::{self, ToCss};
     use std::fmt;
     use values::LocalToCss;
@@ -445,7 +444,9 @@ ${helpers.predefined_type("opacity",
         Opacity(CSSFloat),
         Saturate(CSSFloat),
         Sepia(CSSFloat),
+        % if product == "gecko":
         DropShadow(Length, Length, Length, Option<CSSColor>),
+        % endif
     }
 
     pub mod computed_value {
@@ -466,7 +467,9 @@ ${helpers.predefined_type("opacity",
             Opacity(CSSFloat),
             Saturate(CSSFloat),
             Sepia(CSSFloat),
+            % if product == "gecko":
             DropShadow(Au, Au, Au, CSSColor),
+            % endif
         }
 
         #[derive(Clone, PartialEq, Debug)]
@@ -564,6 +567,7 @@ ${helpers.predefined_type("opacity",
                 computed_value::Filter::Opacity(value) => try!(write!(dest, "opacity({})", value)),
                 computed_value::Filter::Saturate(value) => try!(write!(dest, "saturate({})", value)),
                 computed_value::Filter::Sepia(value) => try!(write!(dest, "sepia({})", value)),
+                % if product == "gecko":
                 computed_value::Filter::DropShadow(offset_x, offset_y, blur_radius, ref color) => {
                     try!(dest.write_str("drop-shadow("));
                     try!(offset_x.to_css(dest));
@@ -575,6 +579,7 @@ ${helpers.predefined_type("opacity",
                     try!(color.to_css(dest));
                     try!(dest.write_str(")"));
                 }
+                % endif
             }
             Ok(())
         }
@@ -600,6 +605,7 @@ ${helpers.predefined_type("opacity",
                 SpecifiedFilter::Opacity(value) => try!(write!(dest, "opacity({})", value)),
                 SpecifiedFilter::Saturate(value) => try!(write!(dest, "saturate({})", value)),
                 SpecifiedFilter::Sepia(value) => try!(write!(dest, "sepia({})", value)),
+                % if product == "gecko":
                 SpecifiedFilter::DropShadow(offset_x, offset_y, blur_radius, ref color) => {
                     try!(dest.write_str("drop-shadow("));
                     try!(offset_x.to_css(dest));
@@ -613,6 +619,7 @@ ${helpers.predefined_type("opacity",
                     }
                     try!(dest.write_str(")"));
                 }
+                % endif
             }
             Ok(())
         }
@@ -641,7 +648,9 @@ ${helpers.predefined_type("opacity",
                         "opacity" => parse_factor(input).map(SpecifiedFilter::Opacity),
                         "saturate" => parse_factor(input).map(SpecifiedFilter::Saturate),
                         "sepia" => parse_factor(input).map(SpecifiedFilter::Sepia),
+                        % if product == "gecko":
                         "drop-shadow" => parse_drop_shadow(input),
+                        % endif
                         _ => Err(())
                     }
                 })));
@@ -662,6 +671,7 @@ ${helpers.predefined_type("opacity",
         }
     }
 
+    % if product == "gecko":
     fn parse_drop_shadow(input: &mut Parser) -> Result<SpecifiedFilter, ()> {
         let offset_x = try!(specified::Length::parse(input));
         let offset_y = try!(specified::Length::parse(input));
@@ -669,6 +679,7 @@ ${helpers.predefined_type("opacity",
         let color = input.try(specified::CSSColor::parse).ok();
         Ok(SpecifiedFilter::DropShadow(offset_x, offset_y, blur_radius, color))
     }
+    % endif
 
     impl ToComputedValue for SpecifiedValue {
         type ComputedValue = computed_value::T;
@@ -686,6 +697,7 @@ ${helpers.predefined_type("opacity",
                     SpecifiedFilter::Opacity(factor) => computed_value::Filter::Opacity(factor),
                     SpecifiedFilter::Saturate(factor) => computed_value::Filter::Saturate(factor),
                     SpecifiedFilter::Sepia(factor) => computed_value::Filter::Sepia(factor),
+                    % if product == "gecko":
                     SpecifiedFilter::DropShadow(offset_x, offset_y, blur_radius, ref color) => {
                         computed_value::Filter::DropShadow(
                             offset_x.to_computed_value(context),
@@ -696,6 +708,7 @@ ${helpers.predefined_type("opacity",
                                  .unwrap_or(cssparser::Color::CurrentColor),
                         )
                     }
+                    % endif
                 }
             }).collect() }
         }
@@ -713,6 +726,7 @@ ${helpers.predefined_type("opacity",
                     computed_value::Filter::Opacity(factor) => SpecifiedFilter::Opacity(factor),
                     computed_value::Filter::Saturate(factor) => SpecifiedFilter::Saturate(factor),
                     computed_value::Filter::Sepia(factor) => SpecifiedFilter::Sepia(factor),
+                    % if product == "gecko":
                     computed_value::Filter::DropShadow(offset_x, offset_y, blur_radius, color) => {
                         SpecifiedFilter::DropShadow(
                             ToComputedValue::from_computed_value(&offset_x),
@@ -721,6 +735,7 @@ ${helpers.predefined_type("opacity",
                             Some(ToComputedValue::from_computed_value(&color)),
                         )
                     }
+                    % endif
                 }
             }).collect())
         }
