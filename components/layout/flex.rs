@@ -131,15 +131,23 @@ struct FlexItem {
 // once error"
 /// Resolves the (potentially `auto`) min-{width, height} for flex items
 /// as specified in in https://drafts.csswg.org/css-flexbox/#min-size-auto
-fn resolve_flex_min_size(specified_min_size: LengthOrPercentageOrAuto,
-                         containing_length: Au,
-                         block: &mut BlockFlow) -> Au {
+fn resolve_flex_min_size(block: &BlockFlow,
+                         containing_length: Au) -> Au {
     // TODO: implement the algo in https://drafts.csswg.org/css-flexbox/#min-size-auto
+    let specified_min_size = block.fragment.style.min_inline_size();
     if let LengthOrPercentageOrAuto::Auto = specified_min_size {
         // We need three things: specified size, transferred size, and content size
         // as described in Flexbox Level 1 § 4.5.
         // Since the content size is used in all cases, let's compute it first.
+
+        // "The content size is the min-content size in the main axis,"
         let content_size = block.base.intrinsic_inline_sizes.minimum_inline_size;
+        // "clamped, if it has an aspect ratio, by any definite min and max cross size properties
+        // converted through the aspect ratio,"
+        // TODO: clamp by aspect ratio
+
+        // "and then further clamped by the max main size property if that is definite."
+        let content_size = min(content_size, )
 
         //
         // if (specified size is defininte) {
@@ -205,9 +213,9 @@ impl FlexItem {
                 self.base_size = basis.specified_or_default(content_size);
                 self.max_size = specified_or_none(block.fragment.style.max_inline_size(),
                                                   containing_length).unwrap_or(MAX_AU);
-                self.min_size = resolve_flex_min_size(self.style.min_inline_size(),
-                                                      containing_length,
-                                                      block);
+                let ref style = block.fragment.style;
+                self.min_size = resolve_flex_min_size(block,
+                                                      containing_length);
             }
             Direction::Block => {
                 let basis = from_flex_basis(block.fragment.style.get_position().flex_basis,
@@ -220,7 +228,8 @@ impl FlexItem {
                 self.max_size = specified_or_none(block.fragment.style.max_block_size(),
                                                   containing_length).unwrap_or(MAX_AU);
                 // TODO: use the auto min-size resolution algorithm as in Inline mode
-                self.min_size = specified_or_auto(self.style.min_block_size(), containing_length);
+                let ref style = block.fragment.style;
+                self.min_size = specified_or_auto(style.min_block_size(), containing_length);
             }
         }
     }
