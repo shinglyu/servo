@@ -127,15 +127,31 @@ struct FlexItem {
     pub is_strut: bool
 }
 
-// Not putting this in the impl FlexItem because it will double-borrow
+// Moving this out of the FlexItem impl to overcome the "cannot borrwo `*self` as mutable more then
+// once error"
 /// Resolves the (potentially `auto`) min-{width, height} for flex items
 /// as specified in in https://drafts.csswg.org/css-flexbox/#min-size-auto
-pub fn resolve_flex_min_size(specified_min_size: LengthOrPercentageOrAuto,
-                             containing_length: Au) -> Au {
+fn resolve_flex_min_size(specified_min_size: LengthOrPercentageOrAuto,
+                         containing_length: Au,
+                         block: &mut BlockFlow) -> Au {
     // TODO: implement the algo in https://drafts.csswg.org/css-flexbox/#min-size-auto
-    if let LengthOrPercentageOrAuto::Auto  = specified_min_size {
-        // Do the auto resolution algo
-        Au(6000000)
+    if let LengthOrPercentageOrAuto::Auto = specified_min_size {
+        // We need three things: specified size, transferred size, and content size
+        // as described in Flexbox Level 1 § 4.5.
+        // Since the content size is used in all cases, let's compute it first.
+        let content_size = block.base.intrinsic_inline_sizes.minimum_inline_size;
+
+        //
+        // if (specified size is defininte) {
+        //    min(specified_size, content_size)
+        // }
+        // elseif (has aspect ratio){
+        //    min(transferred_size, content_size)
+        // }
+        // else {
+        //    content_size
+        // }
+        content_size
     }
     else {
         specified_or_auto(specified_min_size, containing_length)
@@ -190,7 +206,8 @@ impl FlexItem {
                 self.max_size = specified_or_none(block.fragment.style.max_inline_size(),
                                                   containing_length).unwrap_or(MAX_AU);
                 self.min_size = resolve_flex_min_size(self.style.min_inline_size(),
-                                                      containing_length);
+                                                      containing_length,
+                                                      block);
             }
             Direction::Block => {
                 let basis = from_flex_basis(block.fragment.style.get_position().flex_basis,
