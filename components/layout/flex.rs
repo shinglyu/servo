@@ -127,45 +127,6 @@ struct FlexItem {
     pub is_strut: bool
 }
 
-// Moving this out of the FlexItem impl to overcome the "cannot borrwo `*self` as mutable more then
-// once error"
-/// Resolves the (potentially `auto`) min-{width, height} for flex items
-/// as specified in in https://drafts.csswg.org/css-flexbox/#min-size-auto
-fn resolve_flex_min_size(block: &BlockFlow,
-                         containing_length: Au) -> Au {
-    // TODO: implement the algo in https://drafts.csswg.org/css-flexbox/#min-size-auto
-    let specified_min_size = block.fragment.style.min_inline_size();
-    if let LengthOrPercentageOrAuto::Auto = specified_min_size {
-        // We need three things: specified size, transferred size, and content size
-        // as described in Flexbox Level 1 § 4.5.
-        // Since the content size is used in all cases, let's compute it first.
-
-        // "The content size is the min-content size in the main axis,"
-        let content_size = block.base.intrinsic_inline_sizes.minimum_inline_size;
-        // "clamped, if it has an aspect ratio, by any definite min and max cross size properties
-        // converted through the aspect ratio,"
-        // TODO: clamp by aspect ratio
-
-        // "and then further clamped by the max main size property if that is definite."
-        let content_size = min(content_size, )
-
-        //
-        // if (specified size is defininte) {
-        //    min(specified_size, content_size)
-        // }
-        // elseif (has aspect ratio){
-        //    min(transferred_size, content_size)
-        // }
-        // else {
-        //    content_size
-        // }
-        content_size
-    }
-    else {
-        specified_or_auto(specified_min_size, containing_length)
-    }
-}
-
 impl FlexItem {
     pub fn new(index: usize, flow: &Flow) -> FlexItem {
         let style = &flow.as_block().fragment.style;
@@ -214,7 +175,7 @@ impl FlexItem {
                 self.max_size = specified_or_none(block.fragment.style.max_inline_size(),
                                                   containing_length).unwrap_or(MAX_AU);
                 let ref style = block.fragment.style;
-                self.min_size = resolve_flex_min_size(block,
+                self.min_size = self.resolve_flex_min_size(block,
                                                       containing_length);
             }
             Direction::Block => {
@@ -229,8 +190,50 @@ impl FlexItem {
                                                   containing_length).unwrap_or(MAX_AU);
                 // TODO: use the auto min-size resolution algorithm as in Inline mode
                 let ref style = block.fragment.style;
+                // self.min_size = specified_or_auto(style.min_block_size(), containing_length);
                 self.min_size = specified_or_auto(style.min_block_size(), containing_length);
             }
+        }
+    }
+
+    /// Resolves the (potentially `auto`) min-{width, height} for flex items
+    /// as specified in in https://drafts.csswg.org/css-flexbox/#min-size-auto
+    fn resolve_flex_min_size(&self, block: &BlockFlow,
+                             containing_length: Au) -> Au {
+        // TODO: implement the algo in https://drafts.csswg.org/css-flexbox/#min-size-auto
+        let specified_min_size = block.fragment.style.min_inline_size();
+        if let LengthOrPercentageOrAuto::Auto = specified_min_size {
+            // TODO: check if "On a flex item whose overflow is visible in the main axis,
+            // when specified on the flex item’s main-axis min-size property", otherwise Au(0)
+
+            // We need three things: specified size, transferred size, and content size
+            // as described in Flexbox Level 1 § 4.5.
+            // Since the content size is used in all cases, let's compute it first.
+
+            // "The content size is the min-content size in the main axis,"
+            let content_size = block.base.intrinsic_inline_sizes.minimum_inline_size;
+            // "clamped, if it has an aspect ratio, by any definite min and max cross size properties
+            // converted through the aspect ratio,"
+            // TODO: clamp by aspect ratio
+
+            // "and then further clamped by the max main size property if that is definite."
+            // FIXME
+            let content_size = min(content_size, self.max_size);
+
+            //
+            // if (specified size is defininte) {
+            //    min(specified_size, content_size)
+            // }
+            // elseif (has aspect ratio){
+            //    min(transferred_size, content_size)
+            // }
+            // else {
+            //    content_size
+            // }
+            content_size
+        }
+        else {
+            specified_or_auto(specified_min_size, containing_length)
         }
     }
 
