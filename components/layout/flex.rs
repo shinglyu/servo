@@ -176,7 +176,7 @@ impl FlexItem {
                                                   containing_length).unwrap_or(MAX_AU);
                 let ref style = block.fragment.style;
                 self.min_size = self.resolve_flex_min_size(block,
-                                                      containing_length);
+                                                      containing_length, direction);
             }
             Direction::Block => {
                 let basis = from_flex_basis(block.fragment.style.get_position().flex_basis,
@@ -196,41 +196,69 @@ impl FlexItem {
         }
     }
 
+    /// Helper function for the resolve_flex_min_size method
+    fn get_content_size(&self, block: &BlockFlow) -> Au {
+        // "The content size is the min-content size in the main axis,"
+        let content_size = block.base.intrinsic_inline_sizes.minimum_inline_size;
+        debug!("intrinsic_inline_sizes: {:?}", block.base.intrinsic_inline_sizes);
+        // "clamped, if it has an aspect ratio, by any definite min and max cross size properties
+        // converted through the aspect ratio,"
+        // TODO: clamp by aspect ratio
+
+        // "and then further clamped by the max main size property if that is definite."
+        // TODO: Will we ever have a indefinite self.max_size? (Flexbox Level 1 § 9.8)
+        min(content_size, self.max_size)
+    }
+
+    /// Helper function for the resolve_flex_min_size method
+    fn get_specified_size(&self, block: &BlockFlow, containing_length: Au) -> Au {
+        match block.fragment.style.content_inline_size() {
+            LengthOrPercentageOrAuto::Auto => {
+                panic!("The main size is not definite, should never reach this function");
+            },
+            _ => specified_or_auto(block.fragment.style.content_inline_size(), containing_length) // TODO: Am I correct?
+        }
+    }
+
+    /// Determine if the main size is definite (Flexbox Level 1 § 9.8)
+    fn main_size_is_definite(&self, block: &BlockFlow, direction: Direction) -> bool{
+        match block.fragment.style.content_inline_size() {
+            LengthOrPercentageOrAuto::Auto => false,
+            _ => true // TODO: implement me
+        }
+    }
+
     /// Resolves the (potentially `auto`) min-{width, height} for flex items
-    /// as specified in in https://drafts.csswg.org/css-flexbox/#min-size-auto
+    /// as specified in in § 4.5 https://drafts.csswg.org/css-flexbox/#min-size-auto
     fn resolve_flex_min_size(&self, block: &BlockFlow,
-                             containing_length: Au) -> Au {
+                             containing_length: Au,
+                             direction: Direction) -> Au {
         // TODO: implement the algo in https://drafts.csswg.org/css-flexbox/#min-size-auto
         let specified_min_size = block.fragment.style.min_inline_size();
         if let LengthOrPercentageOrAuto::Auto = specified_min_size {
+            debug!("Resolving automatic min size for flex item");
             // TODO: check if "On a flex item whose overflow is visible in the main axis,
             // when specified on the flex item’s main-axis min-size property", otherwise Au(0)
-
-            // We need three things: specified size, transferred size, and content size
-            // as described in Flexbox Level 1 § 4.5.
-            // Since the content size is used in all cases, let's compute it first.
-
-            // "The content size is the min-content size in the main axis,"
-            let content_size = block.base.intrinsic_inline_sizes.minimum_inline_size;
-            // "clamped, if it has an aspect ratio, by any definite min and max cross size properties
-            // converted through the aspect ratio,"
-            // TODO: clamp by aspect ratio
-
-            // "and then further clamped by the max main size property if that is definite."
-            // FIXME
-            let content_size = min(content_size, self.max_size);
-
-            //
-            // if (specified size is defininte) {
-            //    min(specified_size, content_size)
-            // }
+            if self.main_size_is_definite(block, direction) {
+                // "In general, the automatic minimum size is the smaller of its content size
+                //  and its specified size."
+                // TODO: handle different direction and writing mode
+                let specified_size = self.get_specified_size(block, containing_length);
+                // TODO: need to handle indefinite case
+                //let specified_size  = specified_or_auto(specified_min_size, containing_length);
+                let content_size = self.get_content_size(block);
+                debug!("Has specified size. specified: {:?}, content: {:?}", specified_size, content_size);
+                min(specified_size, content_size)
+            }
             // elseif (has aspect ratio){
+            // "However, if the box has an aspect ratio and no specified size, its automatic
+            //  minimum size is the smaller of its content size and its transferred size."
             //    min(transferred_size, content_size)
             // }
-            // else {
-            //    content_size
-            // }
-            content_size
+            else {
+                debug!("Neither specified nor aspect ratio. content: {:?}", self.get_content_size(block));
+                self.get_content_size(block)
+            }
         }
         else {
             specified_or_auto(specified_min_size, containing_length)
