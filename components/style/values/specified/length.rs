@@ -884,6 +884,69 @@ impl Parse for LengthOrPercentageOrAuto {
 
 #[derive(Clone, PartialEq, Copy, Debug)]
 #[cfg_attr(feature = "servo", derive(HeapSizeOf))]
+pub enum MinSize {
+    Length(Length),
+    Percentage(Percentage),
+    Auto,
+    Calc(CalcLengthOrPercentage),
+}
+
+impl HasViewportPercentage for MinSize {
+    fn has_viewport_percentage(&self) -> bool {
+        match *self {
+            MinSize::Length(ref length) => length.has_viewport_percentage(),
+            MinSize::Calc(ref calc) => calc.has_viewport_percentage(),
+            _ => false
+        }
+    }
+}
+
+impl ToCss for MinSize {
+    fn to_css<W>(&self, dest: &mut W) -> fmt::Result where W: fmt::Write {
+        match *self {
+            MinSize::Length(length) => length.to_css(dest),
+            MinSize::Percentage(percentage) => percentage.to_css(dest),
+            MinSize::Auto => dest.write_str("auto"),
+            MinSize::Calc(calc) => calc.to_css(dest),
+        }
+    }
+}
+
+impl MinSize {
+    fn parse_internal(input: &mut Parser, context: AllowedNumericType)
+                      -> Result<MinSize, ()>
+    {
+        match try!(input.next()) {
+            Token::Dimension(ref value, ref unit) if context.is_ok(value.value) =>
+                Length::parse_dimension(value.value, unit).map(MinSize::Length),
+            Token::Percentage(ref value) if context.is_ok(value.unit_value) =>
+                Ok(MinSize::Percentage(Percentage(value.unit_value))),
+            Token::Number(ref value) if value.value == 0. =>
+                Ok(MinSize::Length(Length::Absolute(Au(0)))),
+            Token::Ident(ref value) if value.eq_ignore_ascii_case("auto") =>
+                Ok(MinSize::Auto),
+            Token::Function(ref name) if name.eq_ignore_ascii_case("calc") => {
+                let calc = try!(input.parse_nested_block(CalcLengthOrPercentage::parse_length_or_percentage));
+                Ok(MinSize::Calc(calc))
+            },
+            _ => Err(())
+        }
+    }
+    #[inline]
+    pub fn parse_non_negative(input: &mut Parser) -> Result<MinSize, ()> {
+        MinSize::parse_internal(input, AllowedNumericType::NonNegative)
+    }
+}
+
+impl Parse for MinSize {
+    #[inline]
+    fn parse(input: &mut Parser) -> Result<Self, ()> {
+        MinSize::parse_internal(input, AllowedNumericType::All)
+    }
+}
+
+#[derive(Clone, PartialEq, Copy, Debug)]
+#[cfg_attr(feature = "servo", derive(HeapSizeOf))]
 pub enum LengthOrPercentageOrNone {
     Length(Length),
     Percentage(Percentage),

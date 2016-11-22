@@ -80,6 +80,31 @@ impl From<LengthOrPercentageOrAuto> for Option<CalcLengthOrPercentage> {
     }
 }
 
+impl From<MinSize> for Option<CalcLengthOrPercentage> {
+    fn from(len: MinSize) -> Option<CalcLengthOrPercentage> {
+        match len {
+            MinSize::Percentage(this) => {
+                Some(CalcLengthOrPercentage {
+                    length: Au(0),
+                    percentage: Some(this),
+                })
+            }
+            MinSize::Length(this) => {
+                Some(CalcLengthOrPercentage {
+                    length: this,
+                    percentage: None,
+                })
+            }
+            MinSize::Calc(this) => {
+                Some(this)
+            }
+            MinSize::Auto => {
+                None
+            }
+        }
+    }
+}
+
 impl ToCss for CalcLengthOrPercentage {
     fn to_css<W>(&self, dest: &mut W) -> fmt::Result where W: fmt::Write {
         match (self.length, self.percentage) {
@@ -305,6 +330,97 @@ impl ToCss for LengthOrPercentageOrAuto {
             => write!(dest, "{}%", percentage * 100.),
             LengthOrPercentageOrAuto::Auto => dest.write_str("auto"),
             LengthOrPercentageOrAuto::Calc(calc) => calc.to_css(dest),
+        }
+    }
+}
+
+/// A specialized LengthOrPercentageOrAuto
+/// for FlexItem's min-width and min-height, auto resolves to 'auto'
+/// for others, auto resolves to 0px
+#[derive(PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "servo", derive(HeapSizeOf))]
+pub enum MinSize {
+    Length(Au),
+    Percentage(CSSFloat),
+    Auto,
+    Calc(CalcLengthOrPercentage),
+}
+
+impl MinSize {
+    /// Returns true if the computed value is absolute 0 or 0%.
+    ///
+    /// (Returns false for calc() values, even if ones that may resolve to zero.)
+    #[inline]
+    pub fn is_definitely_zero(&self) -> bool {
+        use self::MinSize::*;
+        match *self {
+            Length(Au(0)) | Percentage(0.0) => true,
+            Length(_) | Percentage(_) | Calc(_) | Auto => false
+        }
+    }
+}
+
+impl fmt::Debug for MinSize {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            MinSize::Length(length) => write!(f, "{:?}", length),
+            MinSize::Percentage(percentage) => write!(f, "{}%", percentage * 100.),
+            MinSize::Auto => write!(f, "auto"),
+            MinSize::Calc(calc) => write!(f, "{:?}", calc),
+        }
+    }
+}
+
+impl ToComputedValue for specified::MinSize {
+    type ComputedValue = MinSize;
+
+    #[inline]
+    fn to_computed_value(&self, context: &Context) -> MinSize {
+        match *self {
+            specified::MinSize::Length(value) => {
+                MinSize::Length(value.to_computed_value(context))
+            }
+            specified::MinSize::Percentage(value) => {
+                MinSize::Percentage(value.0)
+            }
+            specified::MinSize::Auto => {
+                MinSize::Auto
+            }
+            specified::MinSize::Calc(calc) => {
+                MinSize::Calc(calc.to_computed_value(context))
+            }
+        }
+    }
+
+    #[inline]
+    fn from_computed_value(computed: &MinSize) -> Self {
+        match *computed {
+            MinSize::Auto => specified::MinSize::Auto,
+            MinSize::Length(value) => {
+                specified::MinSize::Length(
+                    ToComputedValue::from_computed_value(&value)
+                )
+            }
+            MinSize::Percentage(value) => {
+                specified::MinSize::Percentage(specified::Percentage(value))
+            }
+            MinSize::Calc(calc) => {
+                specified::MinSize::Calc(
+                    ToComputedValue::from_computed_value(&calc)
+                )
+            }
+        }
+    }
+}
+
+impl ToCss for MinSize {
+    fn to_css<W>(&self, dest: &mut W) -> fmt::Result where W: fmt::Write {
+        match *self {
+            MinSize::Length(length) => length.to_css(dest),
+            MinSize::Percentage(percentage)
+            => write!(dest, "{}%", percentage * 100.),
+            MinSize::Auto => dest.write_str("auto"),
+            MinSize::Calc(calc) => calc.to_css(dest),
         }
     }
 }

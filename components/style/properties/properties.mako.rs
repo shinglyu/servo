@@ -1177,13 +1177,13 @@ impl ComputedValues {
     }
 
     #[inline]
-    pub fn min_inline_size(&self) -> computed::LengthOrPercentage {
+    pub fn min_inline_size(&self) -> computed::MinSize {
         let position_style = self.get_position();
         if self.writing_mode.is_vertical() { position_style.min_height } else { position_style.min_width }
     }
 
     #[inline]
-    pub fn min_block_size(&self) -> computed::LengthOrPercentage {
+    pub fn min_block_size(&self) -> computed::MinSize {
         let position_style = self.get_position();
         if self.writing_mode.is_vertical() { position_style.min_width } else { position_style.min_height }
     }
@@ -1697,6 +1697,13 @@ pub fn apply_declarations<'a, F, I>(viewport_size: Size2D<Au>,
         if style.get_border().clone_border_${side}_style().none_or_hidden() &&
            style.get_border().border_${side}_has_nonzero_width() {
             style.mutate_border().set_border_${side}_width(Au(0));
+        }
+    % endfor
+
+    % for direction in ["width", "height"]:
+        // Like calling to_computed_value, which wouldn't type check.
+        if let (false, computed::MinSize::Auto) = (is_flex_item, style.get_position().clone_min_${direction}()){
+            style.mutate_position().set_min_${direction}(computed::MinSize::Length(Au(0)));
         }
     % endfor
 

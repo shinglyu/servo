@@ -23,7 +23,7 @@ use std::fmt;
 use style_traits::ToCss;
 use super::ComputedValues;
 use values::Either;
-use values::computed::{Angle, LengthOrPercentageOrAuto, LengthOrPercentageOrNone};
+use values::computed::{Angle, LengthOrPercentageOrAuto, LengthOrPercentageOrNone, MinSize};
 use values::computed::{BorderRadiusSize, LengthOrNone};
 use values::computed::{CalcLengthOrPercentage, LengthOrPercentage};
 use values::computed::position::Position;
@@ -468,6 +468,34 @@ impl Interpolate for LengthOrPercentageOrAuto {
                 let other: Option<CalcLengthOrPercentage> = From::from(other);
                 match this.interpolate(&other, progress) {
                     Ok(Some(result)) => Ok(LengthOrPercentageOrAuto::Calc(result)),
+                    _ => Err(()),
+                }
+            }
+        }
+    }
+}
+
+/// https://drafts.csswg.org/css-transitions/#animtype-lpcalc
+impl Interpolate for MinSize {
+    #[inline]
+    fn interpolate(&self, other: &Self, progress: f64) -> Result<Self, ()> {
+        match (*self, *other) {
+            (MinSize::Length(ref this),
+             MinSize::Length(ref other)) => {
+                this.interpolate(other, progress).map(MinSize::Length)
+            }
+            (MinSize::Percentage(ref this),
+             MinSize::Percentage(ref other)) => {
+                this.interpolate(other, progress).map(MinSize::Percentage)
+            }
+            (MinSize::Auto, MinSize::Auto) => {
+                Ok(MinSize::Auto)
+            }
+            (this, other) => {
+                let this: Option<CalcLengthOrPercentage> = From::from(this);
+                let other: Option<CalcLengthOrPercentage> = From::from(other);
+                match this.interpolate(&other, progress) {
+                    Ok(Some(result)) => Ok(MinSize::Calc(result)),
                     _ => Err(()),
                 }
             }

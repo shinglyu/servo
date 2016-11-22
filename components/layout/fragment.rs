@@ -50,7 +50,7 @@ use style::selector_impl::RestyleDamage;
 use style::servo::restyle_damage::RECONSTRUCT_FLOW;
 use style::str::char_is_whitespace;
 use style::values::Either;
-use style::values::computed::{LengthOrPercentage, LengthOrPercentageOrAuto};
+use style::values::computed::{LengthOrPercentage, LengthOrPercentageOrAuto, MinSize};
 use style::values::computed::LengthOrPercentageOrNone;
 use text;
 use text::TextRunScanner;
@@ -250,11 +250,11 @@ impl fmt::Debug for SpecificFragmentInfo {
 
 /// Clamp a value obtained from style_length, based on min / max lengths.
 fn clamp_size(size: Au,
-              min_size: LengthOrPercentage,
+              min_size: MinSize,
               max_size: LengthOrPercentageOrNone,
               container_size: Au)
               -> Au {
-    let min_size = model::specified(min_size, container_size);
+    let min_size = model::min_size(min_size, container_size);
     let max_size = model::specified_or_none(max_size, container_size);
 
     max(min_size, match max_size {
@@ -729,7 +729,7 @@ impl IframeFragmentInfo {
     }
 
     fn calculate_replaced_size(content_size: LengthOrPercentageOrAuto,
-                               style_min_size: LengthOrPercentage,
+                               style_min_size: MinSize,
                                style_max_size: LengthOrPercentageOrNone,
                                containing_size: Option<Au>,
                                default_size: Au) -> Au {
@@ -1184,7 +1184,7 @@ impl Fragment {
         if flags.contains(INTRINSIC_INLINE_SIZE_INCLUDES_SPECIFIED) {
             specified = MaybeAuto::from_style(style.content_inline_size(),
                                               Au(0)).specified_or_zero();
-            specified = max(model::specified(style.min_inline_size(), Au(0)), specified);
+            specified = max(model::min_size(style.min_inline_size(), Au(0)), specified);
             if let Some(max) = model::specified_or_none(style.max_inline_size(), Au(0)) {
                 specified = min(specified, max)
             }
@@ -1559,7 +1559,8 @@ impl Fragment {
                     LengthOrPercentageOrAuto::Calc(calc) => calc.length(),
                 };
 
-                image_inline_size = max(model::specified(self.style.min_inline_size(), Au(0)), image_inline_size);
+                image_inline_size = max(model::min_size(self.style.min_inline_size(), Au(0)),
+                                        image_inline_size);
                 if let Some(max) = model::specified_or_none(self.style.max_inline_size(), Au(0)) {
                     image_inline_size = min(image_inline_size, max)
                 }
@@ -1579,7 +1580,8 @@ impl Fragment {
                     LengthOrPercentageOrAuto::Calc(calc) => calc.length(),
                 };
 
-                canvas_inline_size = max(model::specified(self.style.min_inline_size(), Au(0)), canvas_inline_size);
+                canvas_inline_size = max(model::min_size(self.style.min_inline_size(), Au(0)),
+                                         canvas_inline_size);
                 if let Some(max) = model::specified_or_none(self.style.max_inline_size(), Au(0)) {
                     canvas_inline_size = min(canvas_inline_size, max)
                 }
@@ -1599,7 +1601,7 @@ impl Fragment {
                     LengthOrPercentageOrAuto::Calc(calc) => calc.length(),
                 };
 
-                svg_inline_size = max(model::specified(self.style.min_inline_size(), Au(0)), svg_inline_size);
+                svg_inline_size = max(model::min_size(self.style.min_inline_size(), Au(0)), svg_inline_size);
                 if let Some(max) = model::specified_or_none(self.style.max_inline_size(), Au(0)) {
                     svg_inline_size = min(svg_inline_size, max)
                 }

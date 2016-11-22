@@ -20,7 +20,7 @@ pub use self::image::{GradientKind, HorizontalDirection, Image, LengthOrKeyword,
 pub use self::image::{SizeKeyword, VerticalDirection};
 pub use self::length::{FontRelativeLength, ViewportPercentageLength, CharacterWidth, Length, CalcLengthOrPercentage};
 pub use self::length::{Percentage, LengthOrNone, LengthOrNumber, LengthOrPercentage, LengthOrPercentageOrAuto};
-pub use self::length::{LengthOrPercentageOrNone, LengthOrPercentageOrAutoOrContent, CalcUnit};
+pub use self::length::{MinSize, LengthOrPercentageOrNone, LengthOrPercentageOrAutoOrContent, CalcUnit};
 
 pub mod basic_shape;
 pub mod image;

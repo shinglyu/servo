@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 use app_units::Au;
+use computed_values;
 use euclid::size::Size2D;
 use font_metrics::FontMetricsProvider;
 use properties::ComputedValues;
@@ -17,7 +18,7 @@ pub use super::{Either, None_};
 pub use super::specified::{Angle, BorderStyle, Time, UrlOrNone};
 pub use super::specified::url::UrlExtraData;
 pub use self::length::{CalcLengthOrPercentage, Length, LengthOrNumber, LengthOrPercentage, LengthOrPercentageOrAuto};
-pub use self::length::{LengthOrPercentageOrAutoOrContent, LengthOrPercentageOrNone, LengthOrNone};
+pub use self::length::{LengthOrPercentageOrAutoOrContent, LengthOrPercentageOrNone, LengthOrNone, MinSize};
 
 pub mod basic_shape;
 pub mod image;
